@@ -3,6 +3,8 @@ use yew::prelude::*;
 struct LoginForm {
     username: String,
     password: String,
+    error_message: Option<String>,
+    success_message: Option<String>,
 }
 
 pub enum Msg {
@@ -19,6 +21,8 @@ impl Component for LoginForm {
         Self {
             username: "".into(),
             password: "".into(),
+            error_message: None,
+            success_message: None,
         }
     }
 
@@ -26,20 +30,28 @@ impl Component for LoginForm {
         match msg {
             Msg::UpdateUsername(new_username) => {
                 self.username = new_username;
+                self.error_message = None;  // Clear error message on input change
+                self.success_message = None;
                 true
             }
             Msg::UpdatePassword(new_password) => {
                 self.password = new_password;
+                self.error_message = None;  // Clear error message on input change
+                self.success_message = None;
                 true
             }
             Msg::Login => {
-                // Handle the login logic here (e.g., API call)
-                if !self.username.is_empty() && !self.password.is_empty() {
-                    log::info!("Logging in with: {} / {}", self.username, self.password);
+                // Simulate login logic (replace with actual API call in real applications)
+                if self.username.is_empty() || self.password.is_empty() {
+                    self.error_message = Some("Please fill in both fields.".to_string());
+                } else if self.username == "admin" && self.password == "password" {
+                    self.success_message = Some("Login successful!".to_string());
+                    self.error_message = None;
                 } else {
-                    log::warn!("Please fill in both fields");
+                    self.error_message = Some("Invalid username or password.".to_string());
+                    self.success_message = None;
                 }
-                false
+                true // Update the view to display error/success messages
             }
         }
     }
@@ -69,6 +81,20 @@ impl Component for LoginForm {
                     <input id="password" type="password" value={self.password.clone()} oninput={password_oninput} />
                 </div>
                 <button onclick={on_login_click}>{ "Login" }</button>
+
+                // Display error message if login fails
+                if let Some(error) = &self.error_message {
+                    html! {
+                        <div style="color: red;">{ error }</div>
+                    }
+                }
+
+                // Display success message if login succeeds
+                if let Some(success) = &self.success_message {
+                    html! {
+                        <div style="color: green;">{ success }</div>
+                    }
+                }
             </div>
         }
     }
